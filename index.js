@@ -22,7 +22,7 @@ drivers.forEach(driver => {
 drivers.push({                            //week 2
     name : "Humai",
     rating : 4.6,
-    available : false
+    isAvailable : false
 });
 
 async function main() {
@@ -42,7 +42,7 @@ async function main() {
         
         // w2 : query
         const highRated =await collection.find({rating : {$gte:4.5}, isAvailable : true}).toArray();
-        console.log("High rate available drivers: ",highRatedDrivers);
+        console.log("High rate available drivers: ",highRated);
         
         // : update
         await collection.updateOne(
@@ -51,14 +51,14 @@ async function main() {
                 {$inc: {rating : 0.1}
             }
         );
-        console.log("rating uodated!");
+        console.log("rating updated!");
         
         //delete
         await collection.deleteMany({isAvailable : false});
         console.log("unavailable drivers deleted");        
 
-        await collection.insertOne({name: "Nis", age:21});
-        console.log("Documented inserted!");
+         await collection.insertOne({name: "Nis", age:21});
+        console.log("Document inserted!");
 
         const result = await collection.findOne({name:"Nis"});
         console.log("Query result:", result);
