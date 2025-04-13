@@ -2,22 +2,21 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-// Root route
+// Route for /
 app.get('/', (req, res) => {
   res.send('Welcome to Ride Hailing API');
 });
 
-// Book ride
+// Route for /book
 app.get('/book', (req, res) => {
   res.send('Your ride has been booked!');
 });
 
-// Cancel ride
+// Route for /cancel
 app.get('/cancel', (req, res) => {
   res.send('Your ride has been cancelled.');
 });
 
-// Start server
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
