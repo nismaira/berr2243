@@ -1,74 +1,81 @@
-const { MongoClient } =require( 'mongodb');
 
-const drivers = [                       //week2 
-    { name : "Nisrina" ,
-        vehicleType : "Myvi",
-        isAvailable : true ,
-        rating : 4.8
-    },
-    {
-        name:"Yana",
-        vehicleType:"Kancil",
-        isAvailable: false,
-        rating : 4.5
-    }
-]; 
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const port = 3000;
 
-console.log(drivers);                   //week 2
-drivers.forEach(driver => {
-    console.log(driver.name);
-});
- 
-drivers.push({                            //week 2
-    name : "Humai",
-    rating : 4.6,
-    isAvailable : false
-});
+const app = express();
+app.use(express.json());
 
-async function main() {
-    const uri = "mongodb://localhost:27017/";
+let db;
+
+async function connectToMongoDB() {
+    const uri = "mongodb://localhost:27017";
     const client = new MongoClient(uri);
 
-    try{
+    try {
         await client.connect();
         console.log("Connected to MongoDB!");
 
-        const db = client.db ("testDB");
-        const collection = db.collection("users");
+        db = client.db("testDB");
+    } catch (err) {
+        console.error("Error:", err);
+    }
+}
 
-        //week 2 : insert drivers
-        await collection.insertMany(drivers);
-        console.log("All drivers inserted!");
-        
-        // w2 : query
-        const highRated =await collection.find({rating : {$gte:4.5}, isAvailable : true}).toArray();
-        console.log("High rate available drivers: ",highRated);
-        
-        // : update
-        await collection.updateOne(
-            {
-                name : "Nisrina"},
-                {$inc: {rating : 0.1}
-            }
+connectToMongoDB();
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+// GET /rides – Fetch all rides
+app.get('/rides', async (req, res) => {
+    try {
+        const rides = await db.collection('rides').find().toArray();
+        res.status(200).json(rides);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch rides" });
+    }
+});
+// POST /rides – Create a new ride
+app.post('/rides', async (req, res) => {
+    try {
+        const result = await db.collection('rides').insertOne(req.body);
+        res.status(201).json({ id: result.insertedId });
+    } catch (err) {
+        res.status(400).json({ error: "Invalid ride data" });
+    }
+});
+// PATCH /rides/:id – Update ride status
+app.patch('/rides/:id', async (req, res) => {
+    try {
+        const result = await db.collection('rides').updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $set: { status: req.body.status } }
         );
-        console.log("rating updated!");
-        
-        //delete
-        await collection.deleteMany({isAvailable : false});
-        console.log("unavailable drivers deleted");        
 
-         await collection.insertOne({name: "Nis", age:21});
-        console.log("Document inserted!");
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: "Ride not found" });
+        }
 
-        const result = await collection.findOne({name:"Nis"});
-        console.log("Query result:", result);
-        }catch (err) 
-        {
-            console.error("Error:", err);
-         } finally {
-                await client.close();
-            }
-} 
+        res.status(200).json({ updated: result.modifiedCount });
+    } catch (err) {
+        // Handle invalid ID format or DB errors
+        res.status(400).json({ error: "Invalid ride ID or data" });
+    }
+});
+// DELETE /rides/:id – Cancel a ride
+app.delete('/rides/:id', async (req, res) => {
+    try {
+        const result = await db.collection('rides').deleteOne(
+            { _id: new ObjectId(req.params.id) }
+        );
 
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Ride not found" });
+        }
 
-main();
+        res.status(200).json({ deleted: result.deletedCount });
+    } catch (err) {
+        res.status(400).json({ error: "Invalid ride ID" });
+    }
+});
