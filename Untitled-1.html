@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      padding: 30px;
+    }
+    .endpoint-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .method {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .GET { background-color: #28a745; }
+    .POST { background-color: #007bff; }
+    .DELETE { background-color: #dc3545; }
+    .PATCH { background-color: #ffc107; color: #333; }
+    .url {
+      font-family: monospace;
+      font-size: 1rem;
+      word-break: break-all;
+    }
+    pre {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+    button {
+      margin-top: 10px;
+      background: #eee;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🚀 API Dashboard - New Collection</h1>
+</header>
+
+<div class="container" id="dashboard"></div>
+
+<script>
+  const endpoints = [
+    {
+      method: "GET",
+      url: "http://localhost:3000/rides",
+      body: `{
+  "pickupLocation": "Central Park",
+  "destination": "Times Square",
+  "driverId": "DRIVER123",
+  "status": "requested"
+}`
+    },
+    {
+      method: "DELETE",
+      url: "http://localhost:3000/rides/6800529fae2bbb80c1a29458",
+      body: `{
+  "status": "cancelled"
+}`
+    },
+    {
+      method: "PATCH",
+      url: "http://localhost:3000/rides/6800529fae2bbb80c1a29458",
+      body: `{
+  "status": "cancelled"
+}`
+    },
+    {
+      method: "POST",
+      url: "http://localhost:3000/rides",
+      body: `{
+  "pickupLocation": "Central Park",
+  "destination": "Times Square",
+  "driverId": "DRIVER123",
+  "status": "requested"
+}`
+    }
+  ];
+
+  const dashboard = document.getElementById("dashboard");
+
+  endpoints.forEach(endpoint => {
+    const card = document.createElement("div");
+    card.className = "endpoint-card";
+
+    const method = document.createElement("span");
+    method.className = method ;{endpoint.method};
+    method.textContent = endpoint.method;
+
+    const url = document.createElement("span");
+    url.className = "url";
+    url.textContent = endpoint.url;
+
+    const pre = document.createElement("pre");
+    pre.textContent = endpoint.body;
+    pre.style.display = "none";
+
+    const btn = document.createElement("button");
+    btn.textContent = "Toggle Body";
+    btn.onclick = () => {
+      pre.style.display = pre.style.display === "none" ? "block" : "none";
+    };
+
+    card.appendChild(method);
+    card.appendChild(url);
+    card.appendChild(document.createElement("br"));
+    card.appendChild(btn);
+    card.appendChild(pre);
+
+    dashboard.appendChild(card);
+  });
+</script>
+
+</body>
+</html>
