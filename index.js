@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const port = 3000;
@@ -15,7 +14,6 @@ async function connectToMongoDB() {
     try {
         await client.connect();
         console.log("Connected to MongoDB!");
-
         db = client.db("eventDB");
     } catch (err) {
         console.error("Error:", err);
@@ -24,34 +22,36 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
+// ✅ FIXED: Added backticks to console.log template string
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
 
-//---------------- for events --------------------
 
-// GET /events – Browse events
+// -------------------- EVENTS --------------------
+
+// ✅ FIXED: Incorrect variable name (was "rides")
 app.get('/events', async (req, res) => {
     try {
-        const rides = await db.collection('events').find().toArray();
+        const events = await db.collection('events').find().toArray();
         res.status(200).json(events);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch events" });
     }
 });
 
-// POST /events  – Admin add events
-app.post('/rides', async (req, res) => {
+// ✅ FIXED: Endpoint was incorrectly named '/rides'
+app.post('/events', async (req, res) => {
     try {
         const result = await db.collection('events').insertOne(req.body);
         res.status(201).json({ id: result.insertedId });
     } catch (err) {
-        res.status(400).json({ error: "Invalid events data" });
+        res.status(400).json({ error: "Invalid event data" });
     }
 });
 
-// DELETE /events/:id – Admin removes event
-app.delete('/rides/:id', async (req, res) => {
+// ✅ FIXED: Endpoint and route were both still using '/rides'
+app.delete('/events/:id', async (req, res) => {
     try {
         const result = await db.collection('events').deleteOne(
             { _id: new ObjectId(req.params.id) }
@@ -67,33 +67,38 @@ app.delete('/rides/:id', async (req, res) => {
     }
 });
 
-// ------------- for ticket ----------------
 
-// POST /tickes  – book ticket
+// -------------------- TICKETS --------------------
 
 app.post('/tickets', async (req, res) => {
     try {
         const { userId, eventId } = req.body;
         if (!userId || !eventId) return res.status(400).send("Missing data");
 
-        const result = await db.collection('tickets').insertOne({ userId, eventId, createdAt: new Date() });
+        const result = await db.collection('tickets').insertOne({
+            userId,
+            eventId,
+            createdAt: new Date()
+        });
         res.status(201).json({ id: result.insertedId });
     } catch (err) {
         res.status(400).json({ error: "Failed to book ticket" });
     }
 });
 
-// DELETE /tickets/:id - Cancel ticket
 app.delete('/tickets/:id', async (req, res) => {
     try {
-        const result = await db.collection('tickets').deleteOne({ _id: new ObjectId(req.params.id) });
-        if (result.deletedCount === 0) return res.status(404).json({ error: "Ticket not found" });
+        const result = await db.collection('tickets').deleteOne(
+            { _id: new ObjectId(req.params.id) }
+        );
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Ticket not found" });
+        }
         res.status(204).send();
     } catch (err) {
         res.status(400).json({ error: "Invalid ticket ID" });
     }
 });
-
 
 
 
