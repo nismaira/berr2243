@@ -4,7 +4,8 @@
   "description": "installation steps\r 1. Browse github \r 2. Create a github education account\r 3. Create new repository\r 4. Create new folder\r 5. Go to VS Code and open folder\r 6. Link the github to VS Code\r 7. Write the installation steps\r -",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
